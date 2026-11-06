@@ -1,0 +1,11 @@
+##gff-version 3
+##sequence-region contigA 1 12000
+##sequence-region plasmidB 1 3000
+contigA	Prodigal:002006	CDS	100	1500	.	+	0	ID=SYN_00001;eC_number=3.6.4.12;Name=dnaA;db_xref=COG:COG0593;gene=dnaA;inference=ab initio prediction:Prodigal:002006,similar to AA sequence:UniProtKB:P03004;locus_tag=SYN_00001;product=Chromosomal replication initiator protein DnaA
+contigA	Prodigal:002006	CDS	2000	2900	.	-	0	ID=SYN_00002;inference=ab initio prediction:Prodigal:002006;locus_tag=SYN_00002;product=hypothetical protein
+contigA	Aragorn:001002	tRNA	3000	3076	.	+	.	ID=SYN_00003;inference=COORDINATES:profile:Aragorn:001002;locus_tag=SYN_00003;product=tRNA-Leu(cag)
+contigA	barrnap:0.9	rRNA	4000	5500	.	+	.	ID=SYN_00004;Name=16S_rRNA;locus_tag=SYN_00004;product=16S ribosomal RNA
+plasmidB	Prodigal:002006	CDS	10	900	.	+	0	ID=SYN_00005;Name=repA;gene=repA;locus_tag=SYN_00005;product=Replication protein%2C RepA family
+##FASTA
+>contigA
+ACGT

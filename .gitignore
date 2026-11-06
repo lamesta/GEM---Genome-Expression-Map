@@ -1,0 +1,17 @@
+# OS / editor
+.DS_Store
+__pycache__/
+*.pyc
+
+# test environment and generated output
+tests/jsdom_env/node_modules/
+tests/jsdom_env/.npm/
+tests/out/
+
+# private / unpublished data — never commit
+example_R10.79/
+tests/fixtures/R10.79_bakta.gbff
+tests/regression_R10.79_*.tsv
+tests/crosscheck_size_factors_pydeseq2.tsv
+docs/img/r1079_*
+docs/USER_GUIDE.pdf

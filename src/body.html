@@ -1,0 +1,89 @@
+<body>
+<!-- ======================= LOADER ======================= -->
+<div id="loader">
+  <h1>genomemap: genome map of transcriptional responses</h1>
+  <div class="sub">Load an annotation (GFF3 or GenBank) plus either raw counts with a sample sheet and contrasts (<b>Mode A</b>), or DESeq2/edgeR result tables (<b>Mode B</b>). Everything runs locally in this browser tab; no data leave your computer. See <i>INPUT_FORMATS.md</i> for the file specifications.</div>
+  <div id="drop" tabindex="0"><b>Drop files here</b> or <label class="filebtn">choose files<input type="file" id="fileIn" multiple></label><div class="small">.gff3 / .gff / .gbk / .gbff · featureCounts / count matrix / HTSeq · samplesheet.tsv · contrasts.tsv · DE tables · landmarks.tsv · labels.tsv · saved dataset .json · gzip (.gz) accepted</div></div>
+  <table id="fileTable"><thead><tr><th>file</th><th>size</th><th>detected as</th><th></th></tr></thead><tbody></tbody></table>
+  <div id="optPanel" class="panel" style="display:none">
+    <h3>Options</h3>
+    <div class="optgrid">
+      <label>Title <input type="text" id="optTitle" size="48"></label>
+      <label>Features shown <span id="optTypes"></span></label>
+      <label class="modeA">Size factors <select id="optSF"><option value="standard">median-of-ratios, DESeq2 standard (genes non-zero in all libraries)</option><option value="zero_tolerant">median-of-ratios, zero-tolerant (as in the 2026 R10.79 viewer)</option></select></label>
+      <label class="modeA">Expression filter: CPM &gt; <input type="number" id="optCPM" value="1" step="0.5" min="0" style="width:60px"> in ≥ <input type="number" id="optMinLibs" value="2" min="1" style="width:50px"> libraries</label>
+      <label class="modeB">Significance threshold padj &lt; <input type="number" id="optAlpha" value="0.05" step="0.01" min="0" max="1" style="width:70px"></label>
+      <label>Bin width <select id="optBin"><option value="5000">5 kb</option><option value="10000" selected>10 kb</option><option value="20000">20 kb</option><option value="50000">50 kb</option></select></label>
+    </div>
+  </div>
+  <div id="designPanel" class="panel" style="display:none">
+    <h3>Samples and contrasts</h3>
+    <div id="designInfo" class="small"></div>
+    <div id="pairEditor" style="display:none">
+      <div class="small">No <i>contrasts.tsv</i> loaded: define pairs (treatment vs control) here. Use “reference” for a noise baseline (e.g. control vs control from two experiments).</div>
+      <div class="pairRow"><select id="peT"></select> vs <select id="peC"></select> <select id="peRole"><option value="test">test</option><option value="reference">reference</option></select> label <input type="text" id="peLabel" size="26" placeholder="e.g. AER vs MC · EXP3"> <button id="peAdd">add pair</button></div>
+    </div>
+    <table id="contrastTable"><thead><tr><th>id</th><th>label</th><th>treatment</th><th>control</th><th>role</th><th></th></tr></thead><tbody></tbody></table>
+    <div class="small"><a href="#" id="dlSheets">download samplesheet.tsv + contrasts.tsv</a> (to reuse or share this design)</div>
+  </div>
+  <div class="loaderBtns"><button id="buildBtn" class="primary" disabled>Build map</button> <span id="buildMsg" class="small"></span></div>
+  <div id="msgs"></div>
+</div>
+<!-- ======================= VIEWER ======================= -->
+<div id="viewer" style="display:none">
+<h1 id="vTitle"></h1>
+<div class="sub" id="vSub"></div>
+<div id="banner"></div>
+<div class="controls">
+  <span><label>Replicon</label><select id="repSel"></select></span>
+  <span><label>Circle bars</label><select id="modeSel"><option value="gene">gene level</option><option value="med">bins: median log2FC</option><option value="frac">bins: fraction |log2FC| &gt; 1</option></select></span>
+  <span><label>Rings</label><select id="ringSel"><option value="all">selected contrasts</option></select></span>
+  <span><label>Colour range</label><select id="vmSel"><option value="2">±2</option><option value="3" selected>±3</option><option value="5">±5</option></select></span>
+  <span><label><input type="checkbox" id="showFilt" checked> show <span id="filtWord">genes failing expression filter</span> (grey)</label></span>
+  <span id="sigCtl" style="display:none"><label><input type="checkbox" id="sigOnly" checked> fade padj ≥ <span id="alphaTxt"></span></label></span>
+  <span style="position:relative"><label>Search</label><input type="text" id="search" placeholder="gene / locus tag / product" size="28"><div id="searchRes"></div></span>
+  <span><label>Region</label><input type="number" id="rs" style="width:95px"> – <input type="number" id="re" style="width:95px"> <button id="goBtn">Go</button></span>
+  <button id="csvBtn">Export genes in window (CSV)</button>
+  <button id="jsonBtn" title="save the computed dataset; it can be dropped on the loader later">Save dataset (.json)</button>
+  <button id="htmlBtn" title="self-contained HTML with this dataset embedded — share it with colleagues">Save report (.html)</button>
+  <button id="newBtn">Load other data</button>
+</div>
+<div class="main">
+  <div id="circCol">
+    <div id="circBar"><b>Circle:</b>
+      <span>drag = <label><input type="radio" name="dmode" value="pan" checked> pan</label> <label><input type="radio" name="dmode" value="select"> select arc</label></span>
+      <span class="small">(shift + drag always selects an arc)</span>
+      <button id="czin">+</button><button id="czout">−</button><button id="czwin">zoom circle to linear window</button><button id="creset">reset view</button>
+      <span class="expGrp">save view: <button id="cExp_png" title="image, 4× screen resolution">PNG</button><button id="cExp_svg" title="vector graphics (editable in Inkscape / Illustrator)">SVG</button><button id="cExp_pdf" title="one-page PDF with a high-resolution image of the view">PDF</button>
+        <label><input type="checkbox" id="cLeg" checked> title + legend</label> <span id="cExpMsg" class="small"></span></span>
+      <span id="zoomInfo"></span></div>
+    <div id="circWrap"><canvas id="circCanvas"></canvas><svg id="circSvg"></svg></div>
+  </div>
+  <div id="side">
+    <div class="panel"><h3>Contrasts shown</h3><div id="ctList"></div><div class="small">Up to 6 test contrasts as rings (outside → in); the first ticked reference contrast is the inner ring <b>N</b>.</div></div>
+    <div class="panel ringkey"><h3>Rings (outside → in)</h3><div id="ringKey"></div></div>
+    <div class="panel"><h3>Colour scale</h3>
+      <div class="lgWrap"><div class="lgBar"></div><div class="lgTicks" id="lgTicks"></div></div>
+      <div class="lgRow" id="lgMode"></div>
+      <div class="lgRow"><span class="sw" style="background:#C4C4CC;opacity:.6"></span><span id="lgFilt"></span></div>
+      <div class="lgRow"><span class="sw" style="background:#C86A3C"></span><span class="sw" style="background:#3D5A9E;margin-left:-3px"></span><span>fraction mode: &gt;+1 outward / &lt;−1 inward (0–50%, clipped)</span></div>
+      <div class="lgCog" id="lgCog"></div>
+    </div>
+    <div class="panel" id="lmPanel"><h3>Landmarks (click to zoom)</h3><div id="lmList"></div></div>
+    <div class="panel"><h3>How to use</h3>
+      <div class="small">Circle: mouse wheel or trackpad pinch zooms, drag pans, double-click zooms in (shift + double-click zooms out). Shift + drag (or “select arc”) selects an arc for the linear view; a single click centres a 30 kb window. Gene labels appear along the rim when zoomed in. The linear view follows the ring selection; brush its gene track to zoom further. Hover any bar or gene for details.</div></div>
+    <div class="panel"><h3>Data and methods</h3><div class="small" id="notes"></div></div>
+  </div>
+</div>
+<div id="linWrap">
+  <div id="linHead"><b>Linear view:</b> <span id="linTitle"></span>
+    <button id="zin">zoom in ×2</button><button id="zout">zoom out ×2</button><button id="pl">◀ pan</button><button id="pr">pan ▶</button>
+    <label id="refLab"><input type="checkbox" id="showNoise"> reference tracks</label>
+    <span class="expGrp">save view: <button id="lExp_png" title="image, 4× screen resolution">PNG</button><button id="lExp_svg" title="vector graphics (editable in Inkscape / Illustrator)">SVG</button><button id="lExp_pdf" title="one-page PDF with a high-resolution image of the view">PDF</button>
+      <label><input type="checkbox" id="lLeg" checked> title + legend</label> <span id="lExpMsg" class="small"></span></span>
+    <span class="small">Brush on the gene track to zoom into a sub-region.</span></div>
+  <svg id="linSvg"></svg>
+</div>
+</div>
+<div id="tip"></div>
+<pre id="selftest"></pre>

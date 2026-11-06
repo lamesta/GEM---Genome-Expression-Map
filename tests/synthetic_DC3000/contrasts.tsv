@@ -1,0 +1,3 @@
+contrast_id	label	short_label	treatment	control	role	de_file
+AER_vs_MC	AER vs MC (synthetic, 3 vs 3)	AER vs MC	condition=AER	condition=MC	test	SYNTHETIC_DESeq2_AER_vs_MC.csv
+MC1_vs_MC2	MC rep 1 vs MC rep 2 (noise)	noise MC1/MC2	MC_1	MC_2	reference	

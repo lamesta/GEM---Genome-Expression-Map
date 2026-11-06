@@ -1,0 +1,7 @@
+sample_id	label	condition	replicate	batch
+MC_1	MC rep 1	MC	1	SYN
+MC_2	MC rep 2	MC	2	SYN
+MC_3	MC rep 3	MC	3	SYN
+AER_1	AER rep 1	AER	1	SYN
+AER_2	AER rep 2	AER	2	SYN
+AER_3	AER rep 3	AER	3	SYN

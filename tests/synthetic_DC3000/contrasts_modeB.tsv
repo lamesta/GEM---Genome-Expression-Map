@@ -1,0 +1,2 @@
+contrast_id	label	short_label	treatment	control	role	de_file
+AER_vs_MC	AER vs MC (synthetic, DESeq2 Wald)	AER vs MC			test	SYNTHETIC_DESeq2_AER_vs_MC.csv
