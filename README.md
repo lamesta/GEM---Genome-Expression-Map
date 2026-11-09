@@ -26,3 +26,9 @@ Two modes:
 - **Mode B**: DESeq2 / edgeR / limma result tables → log2FC and padj shown as they are.
 
 Rebuild the viewer after editing `src/`: `python cli/genomemap_build.py viewer -o dist/genome_map_viewer.html`.
+
+## License
+
+GEM is released under the [MIT License](LICENSE).
+
+Bundled third-party components keep their own licenses: [D3.js](https://d3js.org) (ISC, `src/d3.min.js`) and the [Open Sauce Sans](https://github.com/marcologous/Open-Sauce-Fonts) typeface (SIL Open Font License 1.1, embedded in `src/fonts.css`).

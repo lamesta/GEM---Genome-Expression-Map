@@ -3,5 +3,6 @@
   "version": "1.0.0",
   "private": true,
   "type": "commonjs",
-  "description": "Universal genome-map viewer for paired RNA-seq expression data"
+  "description": "Universal genome-map viewer for paired RNA-seq expression data",
+  "license": "MIT"
 }
